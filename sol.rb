@@ -60,9 +60,7 @@ class Solitaire
   def deal
     @table[:tableau].each_with_index do |_, i|
       (i...@table[:tableau].length).each_with_index do |_, j|
-        card = @deck.draw.first
-        p "[#{i}, #{j}] #{card.rank} of #{card.suit}"
-        @table[:tableau][i + j].push card
+        @table[:tableau][i + j].push @deck.draw.first
       end
     end
     self
