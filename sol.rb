@@ -1,8 +1,7 @@
 require 'pry'
 
 class Card
-  attr_reader :rank, :suit
-  attr_accessor :face_up
+  attr_reader :rank, :suit, :face_up
 
   def initialize(rank, suit)
     @rank =
@@ -20,6 +19,10 @@ class Card
       end
     @suit = suit
     @face_up = false
+  end
+
+  def flip!
+    @face_up = !@face_up
   end
 
   def red?
@@ -51,10 +54,11 @@ class Solitaire
 
   def deal
     deck = build_deck.shuffle!
-    @table[:tableau].each_with_index do |_, i|
+    @table[:tableau].each_with_index do |column, i|
       (i...@table[:tableau].length).each_with_index do |_, j|
         @table[:tableau][i + j].push deck.slice! 0
       end
+      column.last.flip!
     end
     @table[:pile][:stock] += deck
     self
@@ -63,11 +67,11 @@ class Solitaire
   def draw
     drawn = @table[:pile][:stock].slice! -@draw_number, @draw_number
     if drawn
-      drawn.each { |card| card.face_up = true }
+      drawn.each { |card| card.flip! }
       @table[:pile][:waste] += drawn
     else
       @table[:pile][:stock] = @table[:pile][:waste].slice!(0, @table[:pile][:waste].size)
-                                                   .each { |card| card.face_up = false }
+                                                   .each { |card| card.flip! }
       draw
     end
   end
