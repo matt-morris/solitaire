@@ -1,24 +1,8 @@
-class Deck
-  def initialize
-    @cards = [:Spades, :Clubs, :Hearts, :Diamonds].map do |suit|
-      (1..13).map do |rank|
-        Card.new rank, suit
-      end
-    end.flatten
-  end
-
-  def shuffle
-    @cards.shuffle!
-    self
-  end
-
-  def draw(draw_number: 1)
-    @cards.slice! -draw_number, draw_number
-  end
-end
+require 'pry'
 
 class Card
   attr_reader :rank, :suit
+  attr_accessor :face_up
 
   def initialize(rank, suit)
     @rank =
@@ -35,6 +19,7 @@ class Card
         rank
       end
     @suit = suit
+    @face_up = false
   end
 end
 
@@ -43,7 +28,6 @@ class Solitaire
 
   def initialize(draw_number: 3)
     @draw_number = draw_number
-    @deck = Deck.new.shuffle
     @table = {
       foundation: {
         spades: [], clubs: [], hearts: [], diamonds: []
@@ -58,19 +42,42 @@ class Solitaire
   end
 
   def deal
+    deck = build_deck.shuffle!
     @table[:tableau].each_with_index do |_, i|
       (i...@table[:tableau].length).each_with_index do |_, j|
-        @table[:tableau][i + j].push @deck.draw.first
+        @table[:tableau][i + j].push deck.slice! 1
       end
     end
+    @table[:pile][:stock] += deck
     self
   end
 
   def draw
-    @deck.draw @draw_number
+    drawn = @table[:pile][:stock].slice! -@draw_number, @draw_number
+    if drawn
+      drawn.each { |card| card.face_up = true }
+      @table[:pile][:waste] += drawn
+    else
+      @table[:pile][:stock] = @table[:pile][:waste].slice!(0, @table[:pile][:waste].size)
+                                                   .each { |card| card.face_up = false }
+      draw
+    end
+  end
+
+  private
+
+  def build_deck
+    [:Spades, :Clubs, :Hearts, :Diamonds].map do |suit|
+      (1..13).map do |rank|
+        Card.new rank, suit
+      end
+    end.flatten
   end
 end
 
-# p Solitaire.new.deal.table[:tableau].each_with_index { |column, i| p "column #{i}:"; column.each { |card| p card } }
+sol = Solitaire.new.deal
+binding.pry
+
+# p Solitaire.new.deal.draw
 # p Deck.new.shuffle.draw
 # p Card.new(2, :Spades).rank
