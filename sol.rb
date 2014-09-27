@@ -21,6 +21,14 @@ class Card
     @suit = suit
     @face_up = false
   end
+
+  def red?
+    [:Diamonds, :Hearts].include? @suit
+  end
+
+  def black?
+    [:Spades, :Clubs].include? @suit
+  end
 end
 
 class Solitaire
