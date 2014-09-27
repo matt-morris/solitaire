@@ -45,7 +45,7 @@ class Solitaire
     deck = build_deck.shuffle!
     @table[:tableau].each_with_index do |_, i|
       (i...@table[:tableau].length).each_with_index do |_, j|
-        @table[:tableau][i + j].push deck.slice! 1
+        @table[:tableau][i + j].push deck.slice! 0
       end
     end
     @table[:pile][:stock] += deck
